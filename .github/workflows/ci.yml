@@ -49,7 +49,8 @@ jobs:
           MLFLOW_TRACKING_URI: https://dagshub.com/mrestuilahi1405/Eksperimen_SML_Muhammad-Restu-Ilahi.mlflow
         run: |
           # Mengambil Run ID terbaru dari eksperimen terkait
-          RUN_ID=$(mlflow runs search --experiment-names "CI_Workflow_Muhammad-Restu-Ilahi" --max-results 1 --output csv | tail -n 1 | cut -d, -f1)
+          RUN_ID=$(python -c "import mlflow; exp = mlflow.get_experiment_by_name('CI_Workflow_Muhammad-Restu-Ilahi'); runs = mlflow.search_runs(experiment_ids=[exp.experiment_id], max_results=1, order_by=['attributes.start_time DESC']); print(runs['run_id'][0])")
+          
           echo "LATEST_RUN_ID=$RUN_ID" >> $GITHUB_ENV
           echo "Latest Run ID found: $RUN_ID"
 
