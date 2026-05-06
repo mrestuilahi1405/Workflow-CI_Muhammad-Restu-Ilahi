@@ -4,18 +4,28 @@ import numpy as np
 import mlflow
 import mlflow.sklearn
 import dagshub
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import f1_score, accuracy_score
 import os
 import shutil
+import json
+import platform
+import matplotlib.pyplot as plt
+import seaborn as sns
+import sklearn
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import (
+    f1_score, accuracy_score, log_loss, precision_score, 
+    recall_score, roc_auc_score, ConfusionMatrixDisplay, 
+    RocCurveDisplay, PrecisionRecallDisplay
+)
+from sklearn.utils import estimator_html_repr
 
 def train():
     # 1. Setup Argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--n_estimators", type=int, default=104)
-    parser.add_argument("--max_depth", type=int, default=27)
-    parser.add_argument("--min_samples_split", type=int, default=2)
+    parser.add_argument("--n_estimators", type=int, default=453)
+    parser.add_argument("--max_depth", type=int, default=40)
+    parser.add_argument("--min_samples_split", type=int, default=20)
     parser.add_argument("--min_samples_leaf", type=int, default=1)
     args = parser.parse_args()
 
@@ -29,7 +39,7 @@ def train():
         dagshub.init(repo_owner=repo_owner, repo_name=repo_name, mlflow=True)
 
     # 3. Load Data
-    data_path = "credit_risk_clean.csv" 
+    data_path = "creditrisk_preprocessing.csv" 
     if not os.path.exists(data_path):
         print(f"Error: File {data_path} tidak ditemukan!")
         return
@@ -41,7 +51,6 @@ def train():
 
     # 4. MLflow Logging & Registration
     with mlflow.start_run():
-        mlflow.log_params(vars(args))
 
         model = RandomForestClassifier(
             n_estimators=args.n_estimators, 
@@ -50,20 +59,72 @@ def train():
             min_samples_leaf=args.min_samples_leaf,
             random_state=42
         )
+
         model.fit(X_train, y_train)
 
-        y_pred = model.predict(X_test)
-        f1 = f1_score(y_test, y_pred)
-        acc = accuracy_score(y_test, y_pred)
-        
-        mlflow.log_metric("f1_score", f1)
-        mlflow.log_metric("accuracy", acc)
+        tags = {
+                    "estimator_name": model.__class__.__name__,
+                    "estimator_class": f"{model.__class__.__module__}.{model.__class__.__name__}",
+                    "python_version": platform.python_version(),
+                    "sklearn_version": sklearn.__version__,
+                    "mlflow_version": mlflow.__version__,
+                    "os": platform.system()
+                }
+        mlflow.set_tags(tags)
 
-        # PENTING: Daftarkan model ke Registry agar bisa ditarik build-docker
+        params = model.get_params()
+        mlflow.log_params(params)
+
+        y_pred = model.predict(X_test)
+        y_prob = model.predict_proba(X_test)
+
+        metrics = {
+            "training_accuracy_score": accuracy_score(y_test, y_pred),
+            "training_f1_score": f1_score(y_test, y_pred),
+            "training_log_loss": log_loss(y_test, y_prob),
+            "training_precision_score": precision_score(y_test, y_pred),
+            "training_recall_score": recall_score(y_test, y_pred),
+            "training_roc_auc": roc_auc_score(y_test, y_prob[:, 1]),
+            "training_score": model.score(X_test, y_test)
+        }
+        
+        mlflow.log_metrics(metrics)
+
+        with open("estimator.html", "w", encoding="utf-8") as f:
+            f.write(estimator_html_repr(model))
+        mlflow.log_artifact("estimator.html")
+
+        plt.figure(figsize=(8, 6))
+        ConfusionMatrixDisplay.from_estimator(model, X_test, y_test, cmap='Greens', ax=plt.gca())
+        plt.title('Training Confusion Matrix')
+        plt.savefig("training_confusion_matrix.png")
+        mlflow.log_artifact("training_confusion_matrix.png")
+        plt.close()
+
+        plt.figure(figsize=(8, 6))
+        RocCurveDisplay.from_estimator(model, X_test, y_test, ax=plt.gca())
+        plt.title('Training ROC Curve')
+        plt.savefig("training_roc_curve.png")
+        mlflow.log_artifact("training_roc_curve.png")
+        plt.close()
+
+        plt.figure(figsize=(8, 6))
+        PrecisionRecallDisplay.from_estimator(model, X_test, y_test, ax=plt.gca())
+        plt.title('Training Precision Recall Curve')
+        plt.savefig("training_precision_recall_curve.png")
+        mlflow.log_artifact("training_precision_recall_curve.png")
+        plt.close()
+
+        with open("metric_info.json", "w") as f:
+            json.dump(metrics, f, indent=4)
+        mlflow.log_artifact("metric_info.json")
+
+        input_example = X_test.iloc[[0]]
         mlflow.sklearn.log_model(
             sk_model=model, 
             artifact_path="model_credit_risk",
-            registered_model_name="model_credit_risk"
+            registered_model_name="model_credit_risk",
+            input_example=input_example
         )
 
         base_artifacts_path = "../artifacts"
