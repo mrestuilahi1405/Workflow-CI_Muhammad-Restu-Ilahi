@@ -27,8 +27,12 @@ jobs:
           env
 
       - name: Install dependencies
-        run: |
-          pip install mlflow==2.19.0 pandas scikit-learn dagshub joblib matplotlib seaborn
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: '3.12.7'
+          activate-environment: credit_risk_env
+          environment-file: conda.yaml
 
       - name: Run mlflow project
         env:
@@ -36,7 +40,7 @@ jobs:
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
           MLFLOW_TRACKING_URI: https://dagshub.com/mrestuilahi1405/Eksperimen_SML_Muhammad-Restu-Ilahi.mlflow
         run: |
-          mlflow run . --experiment-name "CI_Workflow_Muhammad-Restu-Ilahi" --env-manager local
+          mlflow run . --experiment-name "CI_Workflow_Muhammad-Restu-Ilahi"
 
       - name: Get latest MLflow run_id
         id: get_run_id
