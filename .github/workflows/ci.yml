@@ -36,7 +36,7 @@ jobs:
         env:
           MLFLOW_TRACKING_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
-          MLFLOW_TRACKING_URI: https://dagshub.com/mrestuilahi1405/Eksperimen_SML_Muhammad-Restu-Ilahi.mlflow
+          MLFLOW_TRACKING_URI: https://dagshub.com/${{ secrets.DAGSHUB_USERNAME }}/Eksperimen_SML_Muhammad-Restu-Ilahi.mlflow
         run: |
           mlflow run MLProject --experiment-name "CI_Workflow_Muhammad-Restu-Ilahi" --run-name "CI_Workflow_Muhammad-Restu-Ilahi_Run_v${{ github.run_number }}"
 
@@ -46,7 +46,7 @@ jobs:
         env:
           MLFLOW_TRACKING_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
-          MLFLOW_TRACKING_URI: https://dagshub.com/mrestuilahi1405/Eksperimen_SML_Muhammad-Restu-Ilahi.mlflow
+          MLFLOW_TRACKING_URI: https://dagshub.com/${{ secrets.DAGSHUB_USERNAME }}/Eksperimen_SML_Muhammad-Restu-Ilahi.mlflow
         run: |
           # Mengambil Run ID terbaru dari eksperimen terkait
           RUN_ID=$(python -c "import mlflow; exp = mlflow.get_experiment_by_name('CI_Workflow_Muhammad-Restu-Ilahi'); runs = mlflow.search_runs(experiment_ids=[exp.experiment_id], max_results=1, order_by=['attributes.start_time DESC']); print(runs['run_id'][0])")
@@ -81,9 +81,9 @@ jobs:
         env:
           MLFLOW_TRACKING_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
-          MLFLOW_TRACKING_URI: https://dagshub.com/mrestuilahi1405/Eksperimen_SML_Muhammad-Restu-Ilahi.mlflow
+          MLFLOW_TRACKING_URI: https://dagshub.com/${{ secrets.DAGSHUB_USERNAME }}/Eksperimen_SML_Muhammad-Restu-Ilahi.mlflow
         run: |
-          mlflow models build-docker -m "models:/model_credit_risk/latest" -n "mrestuilahi1405/credit-risk-app:latest" --enable-mlserver --env-manager local
+          mlflow models build-docker -m "models:/model_credit_risk/latest" -n credit-risk-app" --enable-mlserver --env-manager local
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
