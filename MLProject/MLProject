@@ -4,8 +4,8 @@ conda_env: conda.yaml
 entry_points:
   main:
     parameters:
-      n_estimators: {type: int, default: 104} # Hasil Trial 12
-      max_depth: {type: int, default: 27}    # Hasil Trial 12
-      min_samples_split: {type: int, default: 2} # Hasil Trial 12
-      min_samples_leaf: {type: int, default: 1} # Hasil Trial 12
+      n_estimators: {type: int, default: 453} # Hasil Trial 23
+      max_depth: {type: int, default: 40}    # Hasil Trial 23
+      min_samples_split: {type: int, default: 20} # Hasil Trial 23
+      min_samples_leaf: {type: int, default: 1} # Hasil Trial 23
     command: "python modelling.py --n_estimators {n_estimators} --max_depth {max_depth} --min_samples_split {min_samples_split} --min_samples_leaf {min_samples_leaf}"

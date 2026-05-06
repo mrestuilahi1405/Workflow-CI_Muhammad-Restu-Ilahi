@@ -3,12 +3,18 @@ channels:
   - defaults
   - conda-forge
 dependencies:
-  - python=3.12.7 
+  - python=3.12.7
   - pip
   - pip:
       - mlflow==2.19.0
       - scikit-learn
       - pandas
+      - numpy
       - joblib
       - dagshub
       - matplotlib
+      - seaborn
+      - optuna
+      - python-dotenv
+      - mlserver
+      - mlserver-mlflow
