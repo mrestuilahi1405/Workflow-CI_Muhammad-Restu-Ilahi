@@ -10,11 +10,9 @@ dependencies:
       - scikit-learn
       - pandas
       - numpy
-      - joblib
-      - dagshub
       - matplotlib
       - seaborn
       - optuna
-      - python-dotenv
+      - dagshub
       - mlserver
       - mlserver-mlflow

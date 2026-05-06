@@ -32,6 +32,7 @@ jobs:
           environment-file: MLProject/conda.yaml
 
       - name: Run mlflow project
+        shell: bash -l {0}
         env:
           MLFLOW_TRACKING_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
@@ -40,6 +41,7 @@ jobs:
           mlflow run MLProject --experiment-name "CI_Workflow_Muhammad-Restu-Ilahi" --run-name "CI_Workflow_Muhammad-Restu-Ilahi_Run_v${{ github.run_number }}"
 
       - name: Get latest MLflow run_id
+        shell: bash -l {0}
         id: get_run_id
         env:
           MLFLOW_TRACKING_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
@@ -52,15 +54,14 @@ jobs:
           echo "Latest Run ID found: $RUN_ID"
 
       - name: Install Python dependencies
-        run: pip install mlserver mlserver-mlflow
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: model-artifacts-run-${{ github.run_number }}
-          path: MLProject/artifacts/
-          retention-days: 7
+        shell: bash -l {0}
+        run: |
+          pip install --upgrade pip
+          mlserver --version
+          echo "Infrastructure tools verified!"
 
       - name: Upload to GitHub
+        shell: bash -l {0}
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
@@ -74,6 +75,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Docker Model
+        shell: bash -l {0}
         env:
           MLFLOW_TRACKING_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
