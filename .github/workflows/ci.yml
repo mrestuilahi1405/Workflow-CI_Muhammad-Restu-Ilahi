@@ -57,7 +57,8 @@ jobs:
         shell: bash -l {0}
         run: |
           pip install --upgrade pip
-          mlserver --version
+          mlserver --version || pip install mlserver mlserver-mlflow
+          python -c "import mlflow; import sklearn; print('✅ Environment and Infrastructure Ready')"
           echo "Infrastructure tools verified!"
 
       - name: Upload to GitHub

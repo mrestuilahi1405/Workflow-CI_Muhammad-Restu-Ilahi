@@ -148,7 +148,19 @@ def train():
         print(f"✅ Struktur Artefak Berhasil Dibuat!")
         print(f"📍 Model: {model_save_path}")
         print(f"📍 Data : {dataset_artifacts_path}")
-        print(f"✅ Training & Registration Selesai! F1: {f1:.4f}, Accuracy: {acc:.4f}")
+
+        print("\n" + "="*30)
+        print("✅ TRAINING & REGISTRATION SELESAI!")
+        print("="*30)
+        
+        # Mencetak semua metrik secara dinamis dari dictionary metrics
+        for key, value in metrics.items():
+            # Membersihkan nama kunci (opsional: mengganti '_' dengan spasi dan capitalize)
+            display_name = key.replace("training_", "").replace("_", " ").title()
+            print(f"📊 {display_name:20}: {value:.4f}")
+        
+        print("="*30)
+        print(f"📍 Model telah didaftarkan ke Model Registry.")
 
 if __name__ == "__main__":
     train()
