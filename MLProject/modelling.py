@@ -127,7 +127,7 @@ def train():
             input_example=input_example
         )
 
-        base_artifacts_path = "../artifacts"
+        base_artifacts_path = "artifacts"
         model_save_path = os.path.join(base_artifacts_path, "model_credit_risk")
         dataset_artifacts_path = os.path.join(base_artifacts_path, "dataset")
 

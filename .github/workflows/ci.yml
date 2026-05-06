@@ -68,8 +68,8 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           
-          # Arahkan ke folder artifacts
-          git add artifacts/
+          # Arahkan ke folder artifacts di dalam folder MLProject
+          git add MLProject/artifacts/
           
           git commit -m "chore: update production artifacts from run ${{ github.run_number }} [skip ci]" || echo "No changes to commit"
           git push origin main
