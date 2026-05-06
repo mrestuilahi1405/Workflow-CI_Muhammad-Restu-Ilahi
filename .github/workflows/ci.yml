@@ -9,11 +9,8 @@ jobs:
   run-ml-project:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up job
-        run: echo "Starting CI Workflow for Muhammad Restu Ilahi"
-
-      - name: Run actions/checkout@v3
-        uses: actions/checkout@v3
+      
+      - uses: actions/checkout@v3
 
       - name: Set up Python 3.12.7
         uses: actions/setup-python@v4
@@ -32,7 +29,7 @@ jobs:
           auto-update-conda: true
           python-version: '3.12.7'
           activate-environment: credit_risk_env
-          environment-file: conda.yaml
+          environment-file: MLProject/conda.yaml
 
       - name: Run mlflow project
         env:
@@ -40,7 +37,7 @@ jobs:
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
           MLFLOW_TRACKING_URI: https://dagshub.com/mrestuilahi1405/Eksperimen_SML_Muhammad-Restu-Ilahi.mlflow
         run: |
-          mlflow run . --experiment-name "CI_Workflow_Muhammad-Restu-Ilahi"
+          mlflow run MLProject --experiment-name "CI_Workflow_Muhammad-Restu-Ilahi" --run-name "CI_Workflow_Muhammad-Restu-Ilahi_Run_v${{ github.run_number }}"
 
       - name: Get latest MLflow run_id
         id: get_run_id
@@ -57,12 +54,21 @@ jobs:
       - name: Install Python dependencies
         run: pip install mlserver mlserver-mlflow
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: model-artifacts-run-${{ github.run_number }}
+          path: MLProject/artifacts/
+          retention-days: 7
+
       - name: Upload to GitHub
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add artifacts/ || echo "No artifacts folder found"
-          git commit -m "chore: update production artifacts [skip ci]" || echo "No changes to commit"
+          
+          # Arahkan ke folder artifacts di dalam subfolder MLProject sesuai struktur fotomu
+          git add MLProject/artifacts/
+          
+          git commit -m "chore: update production artifacts from run ${{ github.run_number }} [skip ci]" || echo "No changes to commit"
           git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -73,7 +79,7 @@ jobs:
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
           MLFLOW_TRACKING_URI: https://dagshub.com/mrestuilahi1405/Eksperimen_SML_Muhammad-Restu-Ilahi.mlflow
         run: |
-          mlflow models build-docker -m "models:/model_credit_risk/latest" -n "credit-risk-app" --enable-mlserver
+          mlflow models build-docker -m "models:/model_credit_risk/latest" -n "mrestuilahi1405/credit-risk-app:latest" --enable-mlserver
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
