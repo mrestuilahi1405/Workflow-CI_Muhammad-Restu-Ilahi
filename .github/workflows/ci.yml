@@ -83,7 +83,7 @@ jobs:
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
           MLFLOW_TRACKING_URI: https://dagshub.com/mrestuilahi1405/Eksperimen_SML_Muhammad-Restu-Ilahi.mlflow
         run: |
-          mlflow models build-docker -m "models:/model_credit_risk/latest" -n "mrestuilahi1405/credit-risk-app:latest" --enable-mlserver
+          mlflow models build-docker -m "models:/model_credit_risk/latest" -n "mrestuilahi1405/credit-risk-app:latest" --enable-mlserver --env-manager local
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
